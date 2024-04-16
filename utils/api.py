@@ -170,7 +170,46 @@ def summarize(data_path, chunk_size=1024, max_length=75):  # Assuming 75 tokens 
 
   return summaries
 
-# test = summarize('single-page-letters.csv')
+
+
+def add_summaries_to_csv(data_path, summaries, summary_column_name="Summary"):
+  """
+  Adds a summaries list as a new column to a CSV file.
+
+  Args:
+      data_path: Path to the CSV file.
+      summaries: A list of strings containing summaries (one summary per row, assumed to match the order of transcripts in the CSV).
+      summary_column_name: The name of the new column where summaries will be added (default: "Summary").
+
+  Returns:
+      None (Modifies the original CSV file)
+  """
+
+  # Read existing data from CSV
+  with open(data_path, 'r', encoding='utf-8') as csvfile:
+    reader = csv.reader(csvfile)
+    rows = list(reader)  # Convert reader object to a list
+
+  # Check if summaries length matches original data
+  if len(summaries) != len(rows):
+    raise ValueError(f"Summaries list length ({len(summaries)}) doesn't match CSV rows ({len(rows)}).")
+
+  # Create a DataFrame from summaries
+  summary_df = pd.DataFrame({"summary": summaries})
+
+    # Add summary column using existing logic
+  updated_rows = []
+  for i, row in enumerate(rows):
+    summary = summary_df.iloc[i]["summary"]
+    updated_rows.append(row + [summary])
+
+  # Write updated data with summaries back to the CSV
+  with open(data_path, 'w', encoding='utf-8', newline='') as csvfile:
+    writer = csv.writer(csvfile)
+    writer.writerows(updated_rows)
+
+###################### test = summarize('single-page-letters.csv')
+###################### add_summaries_to_csv('single-page-letters.csv',test)
 # need to define keyword as input
 
 def semantic_search_from_csv(csv_path, keyword, top_k=5, threshold=0.8):
