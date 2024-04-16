@@ -6,6 +6,23 @@ from dash import dash_table
 
 from utils.api import fetch_letters
 
+import json
+import firebase_admin
+from firebase_admin import credentials, db
+from pathlib import Path
+
+# LOADS EVERYTHING FIREBASE RELATED
+
+private_keys = json.load(open("credentials.json"))
+FIRESTORE_URL = private_keys["FIRESTORE_URL"]
+
+cred_file_path = Path("./firebase_key.json")
+cred = credentials.Certificate(cred_file_path)
+
+firebase_admin.initialize_app(
+    cred, {"databaseURL": FIRESTORE_URL}
+)
+
 # Set a darker theme for the app
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -18,11 +35,13 @@ app.layout = html.Div([
     dash_table.DataTable(
         id='table',
         columns=[
-            {"name": "Date", "id": "data_sent"},
-            {"name": "Sender", "id": "sender"},
-            {"name": "Transcript", "id": "transcript"},
-            {"name": "Summary", "id": "summary"},
-            {"name": "Recommended Department", "id": "recommended_department"},
+            {'name': 'Letter ID', 'id': 'lid'},
+            {'name': 'Sender', 'id': 'sender'},
+            {'name': 'Recipient', 'id': 'recipient'},
+            {'name': 'Subject', 'id': 'subject'},
+            {'name': 'Date', 'id': 'date'},
+            {'name': 'Departments', 'id': 'Departments'},
+            {'name': 'Department Justification', 'id': 'Department_Justification'},
         ],
         data=[letters_data[lid] for lid in letters_data.keys()],
         style_table={'maxWidth': '100%', 'overflowY': 'auto', 'overflowX': 'auto'},
@@ -37,7 +56,9 @@ app.layout = html.Div([
         },
         style_header={
             'fontWeight': 'bold'
-        }
+        },
+        page_action='native',  # Enable pagination
+        page_size=10
     ),
 
     # Upload component

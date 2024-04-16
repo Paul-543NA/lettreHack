@@ -3,13 +3,14 @@ import csv
 from scipy.spatial.distance import cosine
 from typing import List, Tuple, Dict
 from transformers import BartTokenizer, BartForConditionalGeneration
-!pip install 'transformers[torch]'
-!pip install transformers
 from sentence_transformers import SentenceTransformer
 st_model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
 import pandas as pd
 import spacy
 import nltk
+
+from firebase_admin import db
+
 
 def get_department_recommendation(transcript: str)  -> List[str]:
     return ["HMRC", "Minister of Defense", "Department of Health"]
@@ -28,46 +29,41 @@ def get_summary_from_transcript(transcript: str) -> str:
 def get_relevant_letters_For_keyword(keyword: str, letters: Dict[str, str]) -> List[str]:
     return ["letter1", "letter2"]
 
-def fetch_letters(mock_data=True) -> Dict[str, Dict[str, str]]:
+def fetch_letters(mock_data=False) -> Dict[str, Dict[str, str]]:
+
     if not mock_data:
-        # Fetch data from the database
-        pass
+        # Fetch data from firestore
+        ref = db.reference("/lettres")
+        lettres_list: List = ref.get()
+        lettres_dict = {}
+        for lettre in lettres_list:
+            lettres_dict[lettre["id"]] = lettre
+        return lettres_dict
+
     return {
         "letter1": {
-            "id": "letter1",
-            "data_sent": "2021-01-01",
-            "sender": "John Doe",
-            "transcript": lipsum.generate_words(100),
-            "summary": lipsum.generate_words(10),
-            "recommended_department": "HMRC",
-            "umage_url": "https://via.placeholder.com/150"
+            'id': 0,
+            'text': "SECRET\n\nCHANCELLOR\n\nTreasurable\n(1) P.J Ledl\n(2) The Ptiley Hr.\n\nR. secroo:\n\ncc Chief Secretary\nFinancial Secretary\nSir D Mass\nSir L Airey\nSir F Atkinson\nSir K Couzens\nMr Barrett\nMr Littler\nMr Brideman\nMr Hancock\nMr Middleton\nMr Unwin\nMr P G Davies\nMr Pottrill\nMr Gill\nMrs Gilmore\nMr Hodges\nMrs Lomax\nMr Folger\nMr Williams\nMr Macrae\nMr Ridley\nMr Cardona\nMr Cropper\n\nMr Fforde\nChief Cashier\nMr Goodhart\n\nSPEECH TO THE INSTITUTE OF BANKERS, FRIDAY 16 NOVEMBER\n\nI attach a draft speech which concentrates on monetary policy\nbut contains also a section prepared by Mr Hancock on exchange\ncontrols.  The material may not be entirely consistent with\nthe latest version of tomorrow's statement, and has not yet\nbeen checked",
+            'date': '1979-11-15',
+            'sender': 'C J RILEY',
+            'recipient': 'Chancellor',
+            'subject': 'Speech to the Institute of Bankers',
+            'document-type': 'Letter',
+            'source': 'PREM 19-34/0001/-39.jpg',
+            'Departments': 'HM Treasury',
+            'Department_Justification': "The letter discusses matters related to monetary policy and exchange controls, which fall under the remit of the HM Treasury as the government's economic and finance ministry.",
         },
         "letter2": {
-            "id": "letter2",
-            "data_sent": "2021-01-01",
-            "sender": "Jane Doe",
-            "transcript": lipsum.generate_words(100),
-            "summary": lipsum.generate_words(10),
-            "recommended_department": "Minister of Defense",
-            "umage_url": "https://via.placeholder.com/150"
-        },
-        "letter3": {
-            "id": "letter3",
-            "data_sent": "2021-01-01",
-            "sender": "John Doe",
-            "transcript": lipsum.generate_words(100),
-            "summary": lipsum.generate_words(10),
-            "recommended_department": "Department of Health",
-            "umage_url": "https://via.placeholder.com/150"
-        },
-        "letter4": {
-            "id": "letter4",
-            "data_sent": "2021-01-01",
-            "sender": "Jane Doe",
-            "transcript": lipsum.generate_words(100),
-            "summary": lipsum.generate_words(10),
-            "recommended_department": "HMRC",
-            "umage_url": "https://via.placeholder.com/150"
+            'id': 1,
+            'text': lipsum.generate_sentences(10),
+            'date': '1979-11-15',
+            'sender': 'C J RILEY',
+            'recipient': 'Chancellor',
+            'subject': 'Speech to the Institute of Bankers',
+            'document-type': 'Letter',
+            'source': 'PREM 19-34/0001/-39.jpg',
+            'Departments': 'HM Treasury',
+            'Department_Justification': "The letter discusses matters related to monetary policy and exchange controls, which fall under the remit of the HM Treasury as the government's economic and finance ministry.",
         },
     }
 
