@@ -6,11 +6,37 @@ from transformers import BartTokenizer, BartForConditionalGeneration
 from sentence_transformers import SentenceTransformer
 st_model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
 import pandas as pd
-import spacy
-import nltk
 
+from pathlib import Path
 from firebase_admin import db
+from google.cloud import storage
 
+BUCKET_NAME = "bucket-images-correspondance"
+CREDENTIALS_FILE = Path("./gcs_credentials.json")
+
+def upload_to_gcs(bucket_name, source_file_path, destination_blob_name, credentials_file):
+    # Initialize the Google Cloud Storage client with the credentials
+    storage_client = storage.Client.from_service_account_json(credentials_file)
+
+    # Get the target bucket
+    bucket = storage_client.bucket(bucket_name)
+
+    # Upload the file to the bucket
+    blob = bucket.blob(destination_blob_name)
+    blob.upload_from_filename(source_file_path)
+
+    print(f"File {source_file_path} uploaded to gs://{bucket_name}/{destination_blob_name}")
+
+def get_image_url_from_gcs(bucket_name, blob_name, credentials_file):
+    # Initialize the Google Cloud Storage client with the credentials
+    storage_client = storage.Client.from_service_account_json(credentials_file)
+
+    # Get the target bucket
+    bucket = storage_client.bucket(bucket_name)
+
+    # Get the blob URL
+    blob = bucket.blob(blob_name)
+    return blob.public_url
 
 def get_department_recommendation(transcript: str)  -> List[str]:
     return ["HMRC", "Minister of Defense", "Department of Health"]
@@ -38,6 +64,8 @@ def fetch_letters(mock_data=False) -> Dict[str, Dict[str, str]]:
         lettres_dict = {}
         for lettre in lettres_list:
             lettres_dict[lettre["id"]] = lettre
+            # Add the url to the letter id column
+            lettres_dict[lettre["id"]]["lid"] = f"[{lettre['id']}]({lettre['image_url']})"
         return lettres_dict
 
     return {
@@ -252,4 +280,12 @@ def semantic_search_from_csv(csv_path, keyword, top_k=5, threshold=0.8):
 
   return sorted_results
 
+
+def get_full_info_from_jpeg(image_data: bytes) -> Dict[str, str]:
+    return {
+        "transcript": "This is a transcript",
+        "data_sent": "2021-01-01",
+        "sender": "John Doe",
+        "sentiment": "positive",
+    }
 

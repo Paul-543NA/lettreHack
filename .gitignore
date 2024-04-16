@@ -127,3 +127,4 @@ dmypy.json
 heavy_data/
 firebase_key.json
 credentials.json
+gcs_credentials.json

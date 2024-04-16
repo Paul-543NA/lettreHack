@@ -35,7 +35,7 @@ app.layout = html.Div([
     dash_table.DataTable(
         id='table',
         columns=[
-            {'name': 'Letter ID', 'id': 'lid'},
+            {'name': 'Letter ID', 'id': 'lid', 'presentation': 'markdown'},
             {'name': 'Sender', 'id': 'sender'},
             {'name': 'Recipient', 'id': 'recipient'},
             {'name': 'Subject', 'id': 'subject'},
