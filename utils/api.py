@@ -1,11 +1,12 @@
 import lipsum
 import csv
-from sentence_transformers import SentenceTransformer
-st_model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
 from scipy.spatial.distance import cosine
 from typing import List, Tuple, Dict
-!pip install transformers
 from transformers import BartTokenizer, BartForConditionalGeneration
+!pip install 'transformers[torch]'
+!pip install transformers
+from sentence_transformers import SentenceTransformer
+st_model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
 import pandas as pd
 import spacy
 import nltk
@@ -70,7 +71,18 @@ def fetch_letters(mock_data=True) -> Dict[str, Dict[str, str]]:
         },
     }
 
-
+class BARTSummariser:
+    
+    def __init__(self, model_dir):
+        self.tokenizer = BartTokenizer.from_pretrained(model_dir)
+        self.model = BartForConditionalGeneration.from_pretrained(model_dir)
+        
+    def summarize(self, text, max_length=1024, min_length=100, length_penalty=2.0, num_beams=4):
+        inputs = self.tokenizer.encode("summarize: " + text, return_tensors='pt', max_length=1024, truncation=True)
+        summary_ids = self.model.generate(inputs, max_length=max_length, min_length=min_length, length_penalty=length_penalty, num_beams=num_beams)
+        summary = self.tokenizer.decode(summary_ids[0], skip_special_tokens=True)
+        return summary
+        
 def chunk_text(text,chunk_size=1024, delimiter='\n'):
     """
     Splits the text into chunks with a max_size of Bart, ideally breaking at the specified delimiter
@@ -132,9 +144,7 @@ def summarize(data_path, chunk_size=1024, max_length=75):  # Assuming 75 tokens 
   Returns:
       A list of summaries, one for each transcript in the CSV.
   """
-
-  # Assuming data_path points to the CSV file (replace with your actual model loading)
-  summarizer = BARTSummariser('/tmp/huggingface/bart-large-cnn')  # Assuming BART model is loaded beforehand
+  summarizer = BARTSummariser('/tmp/huggingface/bart-large-cnn')
 
   # Read transcripts from CSV
   transcripts = []
@@ -143,7 +153,7 @@ def summarize(data_path, chunk_size=1024, max_length=75):  # Assuming 75 tokens 
     for row in reader:
       transcript = row[0]  # Assuming transcripts are in the first column (adjust index if needed)
       transcripts.append(transcript)
-
+        
   summaries = []
   for transcript in transcripts:
     # Chunk the transcript if necessary
@@ -164,6 +174,7 @@ def summarize(data_path, chunk_size=1024, max_length=75):  # Assuming 75 tokens 
 
   return summaries
 
+# test = summarize('single-page-letters.csv')
 # need to define keyword as input
 
 def semantic_search_from_csv(csv_path, keyword, top_k=5, threshold=0.8):
