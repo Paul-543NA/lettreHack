@@ -156,7 +156,7 @@ def iterative_summarization(summaries, summarizer, min_length, max_length):
     refined_summaries = [summarizer.summarize(' '.join(batch), min_length=min_length, max_length=max_length) for batch in batched_summaries]
     return ' '.join(refined_summaries)
 
-def summarize(data_path, chunk_size=1024, max_length=75):  # Assuming 75 tokens is around 30 words for your use case (adjust as needed)
+def summarize(data_path, model_path='/tmp/huggingface/bart-large-cnn', chunk_size=1024, max_length=75):  # Assuming 75 tokens is around 30 words for your use case (adjust as needed)
   """
   This function summarizes transcripts from a CSV file using a pre-trained BART model.
 
@@ -168,7 +168,7 @@ def summarize(data_path, chunk_size=1024, max_length=75):  # Assuming 75 tokens 
   Returns:
       A list of summaries, one for each transcript in the CSV.
   """
-  summarizer = BARTSummariser('/tmp/huggingface/bart-large-cnn')
+  summarizer = BARTSummariser(model_path)
 
   # Read transcripts from CSV
   transcripts = []
