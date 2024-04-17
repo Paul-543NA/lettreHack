@@ -289,3 +289,23 @@ def get_full_info_from_jpeg(image_data: bytes) -> Dict[str, str]:
         "sentiment": "positive",
     }
 
+
+def get_summary(
+    transcript: str,
+    model_path: str = "../../bart-large-cnn",
+) -> str:
+    chunk_size, max_length= 1024, 75
+    summarizer = BARTSummariser(model_path)
+    if len(summarizer.tokenizer.encode(transcript, return_tensors="pt")) > chunk_size:
+      chunks = summarizer.tokenizer(transcript, max_length=chunk_size, return_tensors="pt")
+      chunk_summaries = []
+      for chunk in chunks.input_ids:
+        summary = summarizer.model.generate(chunk, max_length=max_length)  # Summarize each chunk
+        summary_text = summarizer.tokenizer.decode(summary[0], skip_special_tokens=True)
+        chunk_summaries.append(summary_text)
+      final_summary = " ".join(chunk_summaries)  # Combine chunk summaries
+    else:
+      # Summarize the entire transcript if it's within chunk size
+      summary = summarizer.model.generate(summarizer.tokenizer.encode(transcript, return_tensors="pt"), max_length=max_length)
+      final_summary = summarizer.tokenizer.decode(summary[0], skip_special_tokens=True)
+    return final_summary
