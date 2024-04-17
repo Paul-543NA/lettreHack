@@ -219,13 +219,13 @@ def extract_metadata_From_image(image_blob, image_id):
     # Merge the two responses
     json_f["Departments"] = triage_res_dict["department"]
     json_f["Department_Justification"] = triage_res_dict["justification"]
-    json_f["summary"] = "I attach a draft speech which concentrates on monetary policy but contains also a section prepared by Mr Hancock on exchange control. The material may not be entirely consistent with the latest version of tomorrow's statement, and has not yet been checked in detail with the Bank. Topping and tailing will, of course, also be necessary."
+    json_f["summary"] = "John Greenborough has sent you a copy of the excellent CBI Resolution on the Budget, which Clive showed you on Wednesday. He also offers his good wishes for the Summit. I attach a draft reply to the CBI's resolution. I will send it to the Prime Minister in due course."
 
     return json_f
 
 
 def upload_image(image_blob):
-    image_id = str(uuid.uuid4())
+    image_id = "z" + str(uuid.uuid4())
     print("Getting metadata from image...")
     image_metadata = extract_metadata_From_image(image_blob, image_id)
     image_metadata["id"] = image_id

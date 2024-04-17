@@ -46,7 +46,7 @@ Summary: {value['summary']}
 presentation_dict = get_letter_markdown_dict(letters_data)
 
 app.layout = html.Div([
-    html.H1("Letters Dashboard"),
+    html.H1("📩 Correspondence Dashboard"),
     # Add a bit of space before the tabl
     html.Br(),
     dcc.Upload(
@@ -72,7 +72,7 @@ app.layout = html.Div([
             {'name': 'Description', 'id': 'Description', "presentation": "markdown"},
             {'name': 'Triage', 'id': 'Triage', "presentation": "markdown"},
         ],
-        data=[presentation_dict[lid] for lid in presentation_dict.keys()],
+        data=[presentation_dict[lid] for lid in presentation_dict.keys()][::-1],
         style_table={'maxWidth': '100%', 'overflowY': 'auto', 'overflowX': 'auto'},
         style_cell={
             'whiteSpace': 'normal',
@@ -92,7 +92,7 @@ app.layout = html.Div([
         html.Div(id='output-image-upload'),
     ])
 
-], style={'padding': '20px'})
+], style={'padding': '50px'})
 
 
 # Callback to handle uploaded images
