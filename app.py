@@ -35,7 +35,7 @@ def get_letter_markdown_dict(letter_dict):
     presentation_dict = {}
     for key, value in letter_dict.items():
         presentation_dict[key] = value
-        presentation_dict[key]["Description"] = f"""**[{value['date']}] {value['subject']}**
+        presentation_dict[key]["Description"] = f"""**[[{value['date']}] {value['subject']}]({value['image_url']})**
 
 *From {value['sender']} to {value['recipient']}*"""
         presentation_dict[key]["Triage"] = f"**{value['Departments']} - Justification:** {value['Department_Justification']}"
@@ -47,10 +47,26 @@ app.layout = html.Div([
     html.H1("Letters Dashboard"),
     # Add a bit of space before the tabl
     html.Br(),
+    dcc.Upload(
+        id='upload-image',
+        children=html.Button('Upload Image', style={'width': '100%', 'height': '100%'}),
+        style={
+            'width': '100%',
+            'height': '60px',
+            'lineHeight': '60px',
+            'borderWidth': '1px',
+            'borderStyle': 'dashed',
+            'borderRadius': '5px',
+            'textAlign': 'center',
+            'margin': '10px'
+        },
+        multiple=True
+    ),
+    html.Div(id='output-image-upload'),
+
     dash_table.DataTable(
         id='table',
         columns=[
-            {'name': 'Letter ID', 'id': 'lid', "presentation": "markdown"},
             {'name': 'Description', 'id': 'Description', "presentation": "markdown"},
             {'name': 'Triage', 'id': 'Triage', "presentation": "markdown"},
         ],
@@ -71,22 +87,6 @@ app.layout = html.Div([
 
     # Upload component
     html.Div([
-        dcc.Upload(
-            id='upload-image',
-            children=html.Button('Upload Image'),
-            style={
-                'width': '100%',
-                'height': '60px',
-                'lineHeight': '60px',
-                'borderWidth': '1px',
-                'borderStyle': 'dashed',
-                'borderRadius': '5px',
-                'textAlign': 'center',
-                'margin': '10px'
-            },
-            # Allow multiple files to be uploaded
-            multiple=True
-        ),
         html.Div(id='output-image-upload'),
     ])
 
