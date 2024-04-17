@@ -62,7 +62,7 @@ def fetch_letters(mock_data=False) -> Dict[str, Dict[str, str]]:
         ref = db.reference("/lettres")
         lettres_list: List = ref.get()
         lettres_dict = {}
-        for lettre in lettres_list:
+        for key, lettre in lettres_list.items():
             lettres_dict[lettre["id"]] = lettre
             # Add the url to the letter id column
             lettres_dict[lettre["id"]]["lid"] = f"[{lettre['id']}]({lettre['image_url']})"

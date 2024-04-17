@@ -5,11 +5,14 @@ from dash.dependencies import Input, Output
 from dash import dash_table
 
 from utils.api import fetch_letters
+from utils.upload_process import upload_image
 
 import json
 import firebase_admin
 from firebase_admin import credentials, db
 from pathlib import Path
+
+from base64 import b64decode
 
 # LOADS EVERYTHING FIREBASE RELATED
 
@@ -28,6 +31,18 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 letters_data = fetch_letters()
 
+def get_letter_markdown_dict(letter_dict):
+    presentation_dict = {}
+    for key, value in letter_dict.items():
+        presentation_dict[key] = value
+        presentation_dict[key]["Description"] = f"""**[{value['date']}] {value['subject']}**
+
+*From {value['sender']} to {value['recipient']}*"""
+        presentation_dict[key]["Triage"] = f"**{value['Departments']} - Justification:** {value['Department_Justification']}"
+    return presentation_dict
+
+presentation_dict = get_letter_markdown_dict(letters_data)
+
 app.layout = html.Div([
     html.H1("Letters Dashboard"),
     # Add a bit of space before the tabl
@@ -35,15 +50,11 @@ app.layout = html.Div([
     dash_table.DataTable(
         id='table',
         columns=[
-            {'name': 'Letter ID', 'id': 'lid', 'presentation': 'markdown'},
-            {'name': 'Sender', 'id': 'sender'},
-            {'name': 'Recipient', 'id': 'recipient'},
-            {'name': 'Subject', 'id': 'subject'},
-            {'name': 'Date', 'id': 'date'},
-            {'name': 'Departments', 'id': 'Departments'},
-            {'name': 'Department Justification', 'id': 'Department_Justification'},
+            {'name': 'Letter ID', 'id': 'lid', "presentation": "markdown"},
+            {'name': 'Description', 'id': 'Description', "presentation": "markdown"},
+            {'name': 'Triage', 'id': 'Triage', "presentation": "markdown"},
         ],
-        data=[letters_data[lid] for lid in letters_data.keys()],
+        data=[presentation_dict[lid] for lid in presentation_dict.keys()],
         style_table={'maxWidth': '100%', 'overflowY': 'auto', 'overflowX': 'auto'},
         style_cell={
             'whiteSpace': 'normal',
@@ -51,14 +62,11 @@ app.layout = html.Div([
             'textAlign': 'left',
             'padding': '5px',
         },
-        style_data={
-            'width': '150px', 'maxWidth': '150px', 'minWidth': '150px',
-        },
         style_header={
             'fontWeight': 'bold'
         },
         page_action='native',  # Enable pagination
-        page_size=10
+        page_size=10,
     ),
 
     # Upload component
@@ -92,13 +100,11 @@ app.layout = html.Div([
     prevent_initial_call=True
 )
 def update_output(list_of_contents):
-    print(list_of_contents)
     if list_of_contents is not None:
-        children = [
-            html.Div("File uploaded successfully!")
-        ]
-        return children
-
+        for content in list_of_contents:
+            content_type, content_string = content.split(',')
+            content_bytes = b64decode(content_string)
+            upload_image(content_bytes)
 
 if __name__ == '__main__':
     app.run_server(debug=True)
