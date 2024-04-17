@@ -36,8 +36,10 @@ def get_letter_markdown_dict(letter_dict):
     for key, value in letter_dict.items():
         presentation_dict[key] = value
         presentation_dict[key]["Description"] = f"""**[[{value['date']}] {value['subject']}]({value['image_url']})**
+*From {value['sender']} to {value['recipient']}*
 
-*From {value['sender']} to {value['recipient']}*"""
+Summary: {value['summary']}
+"""
         presentation_dict[key]["Triage"] = f"**{value['Departments']} - Justification:** {value['Department_Justification']}"
     return presentation_dict
 

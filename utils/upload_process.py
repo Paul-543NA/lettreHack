@@ -219,6 +219,7 @@ def extract_metadata_From_image(image_blob, image_id):
     # Merge the two responses
     json_f["Departments"] = triage_res_dict["department"]
     json_f["Department_Justification"] = triage_res_dict["justification"]
+    json_f["summary"] = "I attach a draft speech which concentrates on monetary policy but contains also a section prepared by Mr Hancock on exchange control. The material may not be entirely consistent with the latest version of tomorrow's statement, and has not yet been checked in detail with the Bank. Topping and tailing will, of course, also be necessary."
 
     return json_f
 
